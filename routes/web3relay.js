@@ -335,14 +335,14 @@ exports.data = function(req, res){
         // search selected token contract only
         toAddr = [addr];
       }
-      //var filter = {"fromBlock": web3.toHex(fromBlock), "toAddress":toAddr};
-      var filter = {"fromBlock":"0x1d4c00", "toAddress":[addr]};
+      var filter = {"fromBlock": web3.toHex(fromBlock), "toAddress":toAddr};
+      //var filter = {"fromBlock":"0x1d4c00", "toAddress":[addr]};
       //filter = filter ? filter : filters;
       filter.count = MAX_ENTRIES;
       if (after) {
         filter.after = after;
       }
-      web3.trace.subscribe(filter, function(err, tx) {
+      web3.eth.filter(filter, function(err, tx) {
         if(err || !tx) {
           console.error("TraceWeb3 error :" + err)
           res.write(JSON.stringify({"error": true}));
