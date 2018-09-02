@@ -22,7 +22,7 @@ try {
 }
 
 var app = express();
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 8000);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -85,6 +85,6 @@ var http = require('http').Server(app);
 
 // web3socket(io);
 
-http.listen(app.get('port'), '0.0.0.0', function() {
+http.listen(app.get('port'), '127.0.0.1', function() {
     console.log('Express server listening on port ' + app.get('port'));
 });
