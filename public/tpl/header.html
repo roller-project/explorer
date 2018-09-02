@@ -4,7 +4,7 @@
     <!-- BEGIN LOGO -->
     <div class="page-logo">
         <a href="/">
-            <img ng-show="settings.logo" src="{{settings.logo}}" alt="logo" class="logo-default" />
+            <img src="https://roller.today/template/smart/image/logo2.png" alt="logo" class="logo-default" />
         </a>
     </div>
     <!-- END LOGO -->
@@ -35,6 +35,11 @@
 </div>
 <!-- END HEADER TOP -->
 <!-- BEGIN HEADER MENU -->
+<style type="text/css">
+  .page-header-menu, .page-header-top{
+    background-color:#1b2c42; 
+  }
+</style>
 <div class="page-header-menu">
     <div class="container">
 
@@ -44,141 +49,165 @@
                 <li class="active">
                     <a href="/">Home</a>
                 </li>
+               
                 <li class="menu-dropdown mega-menu-dropdown ">
-                    <a data-hover="megamenu-dropdown" data-close-others="true" data-toggle="dropdown" href="/token" class="dropdown-toggle"> Tokens
+                    <a data-hover="megamenu-dropdown" data-close-others="true" data-toggle="dropdown" href="javascript:;">Stats
                         <i class="fa fa-angle-down"></i>
                     </a>
-                    <ul class="dropdown-menu" style="min-width: 410px">
-                        <li>
-                            <div class="mega-menu-content">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <ul class="mega-menu-submenu">
-                                            <li>
-                                                <a href="/token/0x085fb4f24031eaedbc2b611aa528f22343eb52db" class="iconify">
-                                                    <i class="icon-pin"></i> BitEther</a>
-                                            </li>
-                                            <li>
-                                                <a href="/dao" class="iconify">
-                                                    <i class="icon-trash"></i> TheDAO</a>
-                                            </li>
-                                            <li>
-                                                <a href="/token" class="iconify">
-                                                    <i class="icon-puzzle"></i> View All Tokens </a>
-                                            </li>
-
-                                        </ul>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <ul class="mega-menu-submenu">
-                                            <li>
-                                                <a href="/" class="iconify">
-                                                    <i class="icon-paper-clip"></i> View Contracts (N/A)</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </li>
-                <li class="menu-dropdown mega-menu-dropdown ">
-                    <a data-hover="megamenu-dropdown" data-close-others="true" data-toggle="dropdown" href="javascript:;" class="dropdown-toggle"> Stats
-                        <i class="fa fa-angle-down"></i>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <div class="mega-menu-content">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <ul class="mega-menu-submenu">
-                                            <li>
-                                                <a href="/stats/hashrate">
-                                                    <i class="fa fa-line-chart"></i> HashRate Growth Chart </a>
-                                            </li>
-                                            <li>
-                                                <a href="/stats/miner_hashrate">
-                                                    <i class="fa fa-line-chart"></i> Miner Distribution Chart</a>
-                                            </li>
-                                            <li>
-                                                <a href="/stats/difficulty">
-                                                    <i class="fa fa-line-chart"></i> Difficulty Chart</a>
-                                            </li>
-                                            <li>
-                                                <a href="/stats/blocktime">
-                                                    <i class="fa fa-line-chart"></i> Blocktime Chart</a>
-                                            </li>
-                                            <li>
-                                                <a href="/stats/The_bomb_chart">
-                                                    <i class="fa fa-line-chart"></i> The bomb chart</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
+                    <ul class="dropdown-menu pull-left">
+                      <li>
+                          <a href="/stats/hashrate">
+                              <i class="fa fa-line-chart"></i>
+                              <span class="title" data-toggle="tooltip" title="Hashrate chart">Hashrate Chart</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="/stats/difficulty">
+                              <i class="fa fa-line-chart"></i>
+                              <span class="title" data-toggle="tooltip" title="Difficulty chart">Difficulty Chart</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="/stats/blocktime">
+                              <i class="fa fa-line-chart"></i>
+                              <span class="title" data-toggle="tooltip" title="Blocktime chart">Blocktime Chart</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="/stats/tx">
+                              <i class="fa fa-line-chart"></i>
+                              <span class="title" data-toggle="tooltip" title="Transaction chart">Transaction Chart</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="/stats/miner_hashrate">
+                              <i class="fa fa-line-chart"></i>
+                              <span class="title" data-toggle="tooltip" title="Miner chart">Miner Distribution Chart</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="/total" target="_blank">
+                              <i class="fa fa-line-chart"></i>
+                              <span class="title" data-toggle="tooltip" title="Total Supply">Total Supply API</span>
+                          </a>
+                      </li>
+                      
                     </ul>
                 </li>
                 <li class="menu-dropdown classic-menu-dropdown ">
-                    <a data-hover="megamenu-dropdown" data-close-others="true" data-toggle="dropdown" href="javascript:;"> Misc
+                   <a href="https://cms.roller.today" target="_blank">Web Wallet</a>
+                </li>
+                <li class="menu-dropdown classic-menu-dropdown ">
+                   <a href="/accounts">Accounts</a>
+                </li>
+                <li class="menu-dropdown classic-menu-dropdown ">
+                   <a href="/token">Tokens</a>
+                </li>
+               
+                <li class="menu-dropdown classic-menu-dropdown ">
+                    <a data-hover="megamenu-dropdown" data-close-others="true" data-toggle="dropdown" href="javascript:;"> Social
                         <i class="fa fa-angle-down"></i>
                     </a>
                     <ul class="dropdown-menu pull-left">
                         <li>
-                            <a href="/">
-                                <i class="icon-check"></i> Verify Contract (N/A)</a>
-                        </li>
-                        <li>
-                            <a href="/">
-                                <i class="icon-refresh"></i>
-                                <span class="title">Broadcast TXN (N/A)</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="menu-dropdown classic-menu-dropdown ">
-                    <a data-hover="megamenu-dropdown" data-close-others="true" data-toggle="dropdown" href="javascript:;"> Community
-                        <i class="fa fa-angle-down"></i>
-                    </a>
-                    <ul class="dropdown-menu pull-left">
-                        <li>
-                          <a href="https://forum.ethereumclassic.org" target="_blank">
-                              <i class="fa fa-group"></i>
-                              <span class="title" data-toggle="tooltip" title="Community Chat"> The Forum</span>
+                          <a href="https://roller.today" target="_blank">
+                              <i class="fa fa-home"></i>
+                              <span class="title" data-toggle="tooltip" title="Reddit Forum"> Roller Home</span>
                           </a>
                         </li>
                         <hr>
                         <li>
-                            <a href="https://tokenmint.io" target="_blank">
-                                <i class="fa fa-leaf"></i>
-                                <span class="title" data-toggle="tooltip" title="ERC223 Token Factory" > TokenMint.io</span>
+                            <a href="https://cms.roller.today" target="_blank">
+                                <i class="fa fa-twitter"></i>
+                                <span class="title" data-toggle="tooltip" title="Roller CMS"> CMS Appication</span>
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://twitter.com/RollerPlatform" target="_blank">
+                                <i class="fa fa-telegram"></i>
+                                <span class="title" data-toggle="tooltip" title="Roller Telegram">Twitter</span>
                             </a>
                         </li>
                         <li>
-                            <a href=" https://ethereumproject.github.io/etherwallet/ " target="_blank">
-                                <i class="fa fa-folder-open"></i>
-                                <span class="title" data-toggle="tooltip" title="Client Side JS ETC Wallet"> ClassicEtherWallet.com</span>
+                            <a href="https://t.me/vnminer" target="_blank">
+                                <i class="fa fa-telegram"></i>
+                                <span class="title" data-toggle="tooltip" title="Roller Telegram">Telegram</span>
                             </a>
                         </li>
                         <li>
-                            <a href="https://classicstats.net" target="_blank">
-                                <i class="fa fa-bar-chart"></i>
-                                <span class="title" data-toggle="tooltip" title="Mainnet Stats"> Live Network Stats </span>
+                            <a href="https://discord.gg/Y928qyU" target="_blank">
+                                <i class="fa fa-commenting"></i>
+                                <span class="title" data-toggle="tooltip" title="Community Chat">Discord</span>
                             </a>
                         </li>
                         <li>
-                            <a href="http://statebot.info" target="_blank">
-                                <i class="fa fa-android"></i>
-                                <span class="title" data-toggle="tooltip" title="JSON state dumps for analysis"> Statebot.io </span>
+                          <a href="https://www.facebook.com/groups/1071050689694143/" target="_blank">
+                              <i class="fa fa-reddit"></i>
+                              <span class="title" data-toggle="tooltip" title="Roller Facebook">Facebook</span>
+                          </a>
+                        </li>
+                        <li>
+                            <a href="https://bitcointalk.org/index.php?topic=4704996.new#new" target="_blank">
+                                <i class="fa fa-btc"></i>
+                                <span class="title" data-toggle="tooltip" title="Bitcointalk Announcement"> Bitcointalk ANN</span>
                             </a>
                         </li>
                         <hr>
                         <li>
-                            <a href="http://teststats.epool.io/" target="_blank">
-                                <i class="fa fa-bar-chart"></i>
-                                <span class="title" data-toggle="tooltip" title="Live Testnet Stats">Morden network stats </span>
+                            <a href="https://github.com/roller-project" target="_blank">
+                                <i class="fa fa-github"></i>
+                                <span class="title" data-toggle="tooltip" title="Github Development">Github Repo</span>
                             </a>
                         </li>
+                    </ul>
+                </li>
+                <li class="menu-dropdown classic-menu-dropdown "><a data-hover="megamenu-dropdown" data-close-others="true" data-toggle="dropdown" href="javascript:;"> Pools
+                        <i class="fa fa-angle-down"></i>
+                    </a>
+                    <ul class="dropdown-menu pull-left dropdown-menu-right">
+                        <li>
+                          <a href="http://pool.roller.today" target="_blank">
+                              <i class="fa fa-group"></i>
+                              <span class="title" data-toggle="tooltip" title="Community Chat"> Official Pool(2%)</span>
+                          </a>
+                        </li>
+                        
+                        <li>
+                          <a href="https://roller.cryptopools.info/" target="_blank">
+                              <i class="fa fa-group"></i>
+                              <span class="title" data-toggle="tooltip" title="Community Chat">cryptopools</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a href="https://comining.io/" target="_blank">
+                              <i class="fa fa-group"></i>
+                              <span class="title" data-toggle="tooltip" title="Community Chat">comining.io</span>
+                          </a>
+                        </li>
+                        
+                        <li>
+                          <a href="http://rol.minerpool.cf/" target="_blank">
+                              <i class="fa fa-group"></i>
+                              <span class="title" data-toggle="tooltip" title="Community Chat"> Minerpool.cf</span>
+                          </a>
+                        </li>
+                        
+                        <li>
+                          <a href="http://pool.claymore.ga" target="_blank">
+                              <i class="fa fa-group"></i>
+                              <span class="title" data-toggle="tooltip" title="Community Chat"> Claymore.ga</span>
+                          </a>
+                        </li>
+                        
+                        <li>
+                          <a href="http://poolfun.ru" target="_blank">
+                              <i class="fa fa-group"></i>
+                              <span class="title" data-toggle="tooltip" title="Community Chat"> poolfun.ru</span>
+                          </a>
+                        </li>
+                        
+                        
 
                     </ul>
                 </li>

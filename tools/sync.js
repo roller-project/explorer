@@ -7,13 +7,52 @@ Please read the README in the root directory that explains the parameters of thi
 require( '../db.js' );
 var etherUnits = require("../lib/etherUnits.js");
 var BigNumber = require('bignumber.js');
+var _ = require('lodash');
 
-var fs = require('fs');
+var async = require('async');
+
 var Web3 = require('web3');
 
 var mongoose        = require( 'mongoose' );
 var Block           = mongoose.model( 'Block' );
 var Transaction     = mongoose.model( 'Transaction' );
+var Account         = mongoose.model( 'Account' );
+
+function normalizeTX(txData, blockData) {
+  var tx = {
+    blockHash: txData.blockHash,
+    blockNumber: txData.blockNumber,
+    from: txData.from,
+    to: txData.to,
+    hash: txData.hash,
+    value: etherUnits.toEther(new BigNumber(txData.value), 'wei'),
+    nonce: txData.nonce,
+    r: txData.r,
+    s: txData.s,
+    v: txData.v,
+    gas: txData.gas,
+    gasPrice: txData.gasPrice,
+    input: txData.input,
+    transactionIndex: txData.transactionIndex,
+    timestamp: blockData.timestamp
+  };
+  if (txData.to == null) {
+    // parity support `creates` field
+    if (txData.creates) {
+      tx.creates = txData.creates;
+      return tx;
+    } else {
+      // getTransactionReceipt to get contract address
+      var receipt = web3.eth.getTransactionReceipt(tx.hash);
+      if (receipt && receipt.contractAddress) {
+        tx.creates = receipt.contractAddress;
+      }
+      return tx;
+    }
+  } else {
+    return tx;
+  }
+}
 
 /**
   //Just listen for latest blocks and sync from the start of the app.
@@ -137,12 +176,19 @@ var writeTransactionsToDB = function(config, blockData, flush) {
     self.bulkOps = [];
     self.blocks = 0;
   }
+  // save miner addresses
+  if (!self.miners) {
+    self.miners = [];
+  }
+  if (blockData) {
+    self.miners.push({ address: blockData.miner, blockNumber: blockData.blockNumber, type: 0 });
+  }
   if (blockData && blockData.transactions.length > 0) {
     for (d in blockData.transactions) {
       var txData = blockData.transactions[d];
-      txData.timestamp = blockData.timestamp;
-      txData.value = etherUnits.toEther(new BigNumber(txData.value), 'wei');
-      self.bulkOps.push(txData);
+
+      var tx = normalizeTX(txData, blockData);
+      self.bulkOps.push(tx);
     }
     console.log('\t- block #' + blockData.number.toString() + ': ' + blockData.transactions.length.toString() + ' transactions recorded.');
   }
@@ -152,8 +198,73 @@ var writeTransactionsToDB = function(config, blockData, flush) {
     var bulk = self.bulkOps;
     self.bulkOps = [];
     self.blocks = 0;
-    if(bulk.length == 0) return;
+    var miners = self.miners;
+    self.miners = [];
 
+    // setup accounts
+    var data = {};
+    bulk.forEach(function(tx) {
+      data[tx.from] = { address: tx.from, blockNumber: tx.blockNumber, type: 0 };
+      if (tx.to) {
+        data[tx.to] = { address: tx.to, blockNumber: tx.blockNumber, type: 0 };
+      }
+    });
+
+    // setup miners
+    miners.forEach(function(miner) {
+      data[miner.address] = miner;
+    });
+
+    var accounts = Object.keys(data);
+
+    if (bulk.length == 0 && accounts.length == 0) return;
+
+    // update balances
+    if (accounts.length > 0)
+    async.eachSeries(accounts, function(account, eachCallback) {
+      var blockNumber = data[account].blockNumber;
+      // get contract account type
+      web3.eth.getCode(account, function(err, code) {
+        if (err) {
+          console.log("ERROR: fail to getCode(" + account + ")");
+          return eachCallback(err);
+        }
+        if (code.length > 2) {
+          data[account].type = 1; // contract type
+        }
+
+        web3.eth.getBalance(account, blockNumber, function(err, balance) {
+          if (err) {
+            console.log("ERROR: fail to getBalance(" + account + ")");
+            return eachCallback(err);
+          }
+
+          //data[account].balance = web3.fromWei(balance, 'ether');
+          let ether;
+          if (typeof balance === 'object') {
+            ether = parseFloat(balance.div(1e18).toString());
+          } else {
+            ether /= 1e18;
+          }
+          data[account].balance = ether;
+          eachCallback();
+        });
+      });
+    }, function(err) {
+      var n = 0;
+      accounts.forEach(function(account) {
+        n++;
+        if (n <= 5) {
+          console.log(' - upsert ' + account + ' / balance = ' + data[account].balance);
+        } else if (n == 6) {
+          console.log('   (...) total ' + accounts.length + ' accounts updated.');
+        }
+        // upsert account
+        Account.collection.update({ address: account }, { $set: data[account] }, { upsert: true });
+      });
+    });
+
+    if (bulk.length > 0)
     Transaction.collection.insert(bulk, function( err, tx ){
       if ( typeof err !== 'undefined' && err ) {
         if (err.code == 11000) {
@@ -287,38 +398,28 @@ var checkBlockDBExistsThenWrite = function(config, patchData, flush) {
 /**
   Start config for node connection and sync
 **/
-var config = {};
-//Look for config.json file if not
+/**
+ * nodeAddr: node address
+ * gethPort: geth port
+ * bulkSize: size of array in block to use bulk operation
+ */
+// load config.json
+var config = { nodeAddr: 'localhost', gethPort: 8545, bulkSize: 100 };
 try {
-    var configContents = fs.readFileSync('config.json');
-    config = JSON.parse(configContents);
+    var local = require('../config.json');
+    _.extend(config, local);
     console.log('config.json found.');
+} catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+        var local = require('../config.example.json');
+        _.extend(config, local);
+        console.log('No config file found. Using config.example.json... (config.example.json)');
+    } else {
+        throw error;
+        process.exit(1);
+    }
 }
-catch (error) {
-  if (error.code === 'ENOENT') {
-      console.log('No config file found.');
-  }
-  else {
-      throw error;
-      process.exit(1);
-  }
-}
-// set the default NODE address to localhost if it's not provided
-if (!('nodeAddr' in config) || !(config.nodeAddr)) {
-  config.nodeAddr = 'localhost'; // default
-}
-// set the default geth port if it's not provided
-if (!('gethPort' in config) || (typeof config.gethPort) !== 'number') {
-  config.gethPort = 8545; // default
-}
-// set the default output directory if it's not provided
-if (!('output' in config) || (typeof config.output) !== 'string') {
-  config.output = '.'; // default this directory
-}
-// set the default size of array in block to use bulk operation.
-if (!('bulkSize' in config) || (typeof config.bulkSize) !== 'number') {
-  config.bulkSize = 100;
-}
+
 console.log('Connecting ' + config.nodeAddr + ':' + config.gethPort + '...');
 
 // Sets address for RPC WEB3 to connect to, usually your node IP address defaults ot localhost

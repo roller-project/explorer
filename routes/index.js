@@ -15,26 +15,44 @@ module.exports = function(app){
   var compile = require('./compiler');
   var fiat = require('./fiat');
   var stats = require('./stats');
+  var richList = require('./richlist');
 
-  /* 
+  /*
     Local DB: data request format
-    { "address": "0x1234blah", "txin": true } 
+    { "address": "0x1234blah", "txin": true }
     { "tx": "0x1234blah" }
     { "block": "1234" }
   */
+  app.post('/richlist', richList);
   app.post('/addr', getAddr);
   app.post('/addr_count', getAddrCounter);
   app.post('/tx', getTx);
   app.post('/block', getBlock);
   app.post('/data', getData);
+  app.get('/total', getTotal);
 
   app.post('/daorelay', DAO);
-  app.post('/tokenrelay', Token);  
+  app.post('/tokenrelay', Token);
   app.post('/web3relay', web3relay.data);
   app.post('/compile', compile);
 
   app.post('/fiat', fiat);
   app.post('/stats', stats);
+
+  app.get('/api/richlist', richList);
+  app.get('/api/addr', getAddr);
+  app.get('/api/addr_count', getAddrCounter);
+  app.get('/api/tx', getTx);
+  app.get('/api/block', getBlock);
+  app.get('/api/data', getData);
+
+  app.get('/api/daorelay', DAO);
+  app.get('/api/tokenrelay', Token);
+  app.get('/api/web3relay', web3relay.data);
+  app.get('/api/compile', compile);
+
+  app.get('/api/fiat', fiat);
+  app.get('/api/stats', stats);
 }
 
 var getAddr = function(req, res){
@@ -47,7 +65,7 @@ var getAddr = function(req, res){
 
   var data = { draw: parseInt(req.body.draw), recordsFiltered: count, recordsTotal: count, mined: 0 };
 
-  var addrFind = Transaction.find( { $or: [{"to": addr}, {"from": addr}] })  
+  var addrFind = Transaction.find( { $or: [{"to": addr}, {"from": addr}] })
 
   var sortOrder = '-blockNumber';
   if (req.body.order && req.body.order[0] && req.body.order[0].column) {
@@ -149,15 +167,29 @@ var getData = function(req, res){
     if (isNaN(limit))
       var lim = MAX_ENTRIES;
     else
-      var lim = parseInt(limit);  
+      var lim = parseInt(limit);
     DATA_ACTIONS[action](lim, res);
-  } else { 
+  } else {
     console.error("Invalid Request: " + action)
     res.status(400).send();
   }
 };
 
-/* 
+/*
+  Total supply API code
+*/
+var getTotal = function(req, res) {
+  var block = Block.findOne({}, "number")
+                      .lean(true).sort('-number');
+  block.exec(function (err, doc) {
+    // res.write(JSON.stringify(doc));
+    var total = 990000000 + (doc.number) * 60;
+    res.write(total.toString());
+    res.end();
+  });
+}
+
+/*
   temporary blockstats here
 */
 var latestBlock = function(req, res) {
@@ -167,7 +199,7 @@ var latestBlock = function(req, res) {
     res.write(JSON.stringify(doc));
     res.end();
   });
-} 
+}
 
 
 var getLatest = function(lim, res, callback) {
@@ -225,4 +257,3 @@ const DATA_ACTIONS = {
   "latest_blocks": sendBlocks,
   "latest_txs": sendTxs
 }
-

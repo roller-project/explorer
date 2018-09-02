@@ -1,6 +1,7 @@
 var mongoose = require( 'mongoose' );
 var Block     = mongoose.model( 'Block' );
 var BlockStat = mongoose.model( 'BlockStat' );
+var Transaction = mongoose.model( 'Transaction' );
 var filters = require('./filters');
 
 var https = require('https');
@@ -13,8 +14,8 @@ try {
   config = require('../config.json');
 } catch(e) {
   if (e.code == 'MODULE_NOT_FOUND') {
-    console.log('No config file found. Using default configuration... (tools/config.json)');
-    config = require('../tools/config.json');
+    console.log('No config file found. Using default configuration... (config.example.json)');
+    config = require('../config.example.json');
   } else {
     throw e;
     process.exit(1);
@@ -25,16 +26,19 @@ module.exports = function(req, res) {
 
   if (!("action" in req.body))
     res.status(400).send();
-  
-  else if (req.body.action=="miners") 
+
+  else if (req.body.action=="miners")
     getMinerStats(req, res)
-  
-  else if (req.body.action=="hashrate") 
+
+  else if (req.body.action=="hashrate")
     getHashrate(res);
 
   else if (req.body.action=="hashrates")
     getHashrates(req, res);
-  
+
+  else if (req.body.action=="txns")
+    getTxStats(req, res);
+
 }
 /**
   Aggregate miner stats
@@ -83,6 +87,74 @@ var getMinerStats = function(req, res) {
           res.end();
         }
     });
+  });
+}
+
+/**
+  Aggregate transaction stats
+ */
+var getTxStats = function(req, res) {
+  var days = config.settings.stats && config.settings.stats.txnDays || 30;
+  var range =  24*days*60*60;
+  // check validity of range
+  if (req.body.range && req.body.range < 60 * 60 * 24 * 7) {
+    range = parseInt(req.body.range);
+    if (range < 3600) { // minimal 1 hour
+      range = 3600;
+    }
+  }
+
+  // select mod
+  var rngs = [    60*60,    2*60*60,     4*60*60,     6*60*60,    12*60*60,
+               24*60*60, 7*24*60*60, 14*24*60*60, 30*24*60*60, 60*24*60*60
+             ];
+  var mods = [    30*60,      30*60,       60*60,       60*60,       60*60,
+                  60*60,   24*60*60,    24*60*60,    24*60*60,    24*60*60,
+               24*60*60
+             ];
+  var i = 0;
+  rngs.forEach(function(r) {
+    if (range > r) {
+      i++;
+    }
+    return;
+  });
+  var mod = mods[i];
+
+  var timebefore = parseInt((new Date()).getTime() / 1000) - range;
+  timebefore -= timebefore % mod;
+  Transaction.aggregate([{
+    $match: {
+      timestamp: {
+        $gte: timebefore
+      }
+    }
+  }, {
+    $group: {
+      _id: {
+        timestamp: {
+          $subtract: [ '$timestamp', { $mod: [ '$timestamp', mod ] } ]
+        }
+      },
+      timestamp: { $min: '$timestamp' },
+      txns: { $sum: 1 },
+      amount: { $sum: '$value' }
+    }
+  }, {
+    $project: {
+      "_id": 0,
+      "timestamp": 1,
+      "txns": 1,
+      "amount": 1
+    }
+  }]).sort('timestamp').exec(function(err, result) {
+    if (err || !result) {
+      console.error(err);
+      res.status(500).send();
+    } else {
+      res.write(JSON.stringify(result));
+      res.end();
+    }
   });
 }
 
@@ -194,9 +266,9 @@ var getEtcEth = function(res) {
     method: 'GET',
     data: 'eth'
   }];
-  
+
   async.map(options, function(opt, callback) {
-    
+
     https.request(opt, function(mg) {
       mg.on('data', function (data) {
         try {
@@ -233,7 +305,7 @@ var getEtcEth = function(res) {
           "etcEthDiff": etcEthDiff
         }));
         res.end();
-      } 
+      }
     }
 
   });

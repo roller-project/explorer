@@ -53,7 +53,7 @@ Layout Partials.
 By default the partials are loaded through AngularJS ng-include directive.
 ***/
 /* Setup Layout Part - Header */
-BlocksApp.controller('HeaderController', ['$scope', '$location', 'setupObj', function($scope, $location, setupObj) {
+BlocksApp.controller('HeaderController', ['$scope', '$location', function($scope, $location) {
     $scope.$on('$includeContentLoaded', function() {
         Layout.initHeader(); // init header
     });
@@ -73,26 +73,17 @@ BlocksApp.controller('HeaderController', ['$scope', '$location', 'setupObj', fun
         else 
             $scope.form.searchInput = search;
     }
-    setupObj.then(function(res) {
-        $scope.settings = res;
-    });
 }]);
 /* Search Bar */
-BlocksApp.controller('PageHeadController', ['$scope', 'setupObj', function($scope, setupObj) {
+BlocksApp.controller('PageHeadController', ['$scope', function($scope) {
     $scope.$on('$includeContentLoaded', function() {        
         
     });
-    setupObj.then(function(res) {
-        $scope.settings = res;
-    });
 }]);
 /* Setup Layout Part - Footer */
-BlocksApp.controller('FooterController', ['$scope', 'setupObj', function($scope, setupObj) {
+BlocksApp.controller('FooterController', ['$scope', function($scope) {
     $scope.$on('$includeContentLoaded', function() {
         Layout.initFooter(); // init footer
-    });
-    setupObj.then(function(res) {
-        $scope.settings = res;
     });
 }]);
 /* Setup Rounting For All Pages */
@@ -130,6 +121,27 @@ BlocksApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvide
                         insertBefore: '#ng_load_plugins_before', // load the above css files before '#ng_load_plugins_before'
                         files: [
                              '/js/controllers/AddressController.js',
+                            '/plugins/datatables/datatables.min.css',
+                            '/plugins/datatables/datatables.bootstrap.css',
+                            '/plugins/datatables/datatables.all.min.js',
+                            '/plugins/datatables/datatable.min.js'
+                        ]
+                    });
+                }]
+            }
+        })
+        .state('accounts', {
+            url: "/accounts",
+            templateUrl: "views/accounts.html",
+            data: {pageTitle: 'Accounts'},
+            controller: "AccountsController",
+            resolve: {
+                deps: ['$ocLazyLoad', function($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        name: 'BlocksApp',
+                        insertBefore: '#ng_load_plugins_before', // load the above css files before '#ng_load_plugins_before'
+                        files: [
+                            '/js/controllers/AccountsController.js',
                             '/plugins/datatables/datatables.min.css',
                             '/plugins/datatables/datatables.bootstrap.css',
                             '/plugins/datatables/datatables.all.min.js',
@@ -189,6 +201,24 @@ BlocksApp.config(['$stateProvider', '$urlRouterProvider', function($stateProvide
                              '/js/controllers/TxController.js'
                         ]
                     });
+                }]
+            }
+        })
+        .state('viewcontract', {
+            url: "/contract",
+            templateUrl: "views/contract.html",
+            data: {pageTitle: 'Verify Contract'},
+            controller: "ContractController",
+            resolve: {
+                deps: ['$ocLazyLoad', function($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        name: 'BlocksApp',
+                        insertBefore: '#ng_load_plugins_before',
+                        files: [
+                             '/js/controllers/ContractController.js',
+                             '/js/custom.js'
+                         ]
+                     });
                 }]
             }
         })
