@@ -335,8 +335,8 @@ exports.data = function(req, res){
         // search selected token contract only
         toAddr = [addr];
       }
-      var filter = {"fromBlock": web3.toHex(fromBlock), "toAddress":toAddr};
-      var filters = {"fromBlock":"0x1d4c00", "toAddress":[addr]};
+      //var filter = {"fromBlock": web3.toHex(fromBlock), "toAddress":toAddr};
+      var filter = {"fromBlock":"0x1d4c00", "toAddress":[addr]};
       filter = filter ? filter : filters;
       filter.count = MAX_ENTRIES;
       if (after) {
