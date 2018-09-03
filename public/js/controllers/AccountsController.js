@@ -21,7 +21,7 @@ angular.module('BlocksApp').controller('AccountsController', function($statePara
 
           // fixup data to show percentages
           var newdata = resp.data.data.map(function(item) {
-            return [item[0], item[1].replace('0xf5e48e9cb2fabdf4ce157f23a56f6665e478ec6f','Masternode Contracts'), item[2], item[3], (item[3] / $scope.totalSupply) * 100, item[4]];
+            return [item[0], item[1].replace('0xf5e48e9cb2fabdf4ce157f23a56f6665e478ec6f','Masternode Contracts').replace('0x672af8a93fab9135d60ba69218d0d6ce570fa0e4','Miner block 0-50.000').replace('0xf1fd34b7a4d3af6b4a8f6ff7d4c3d982fd5dd6af','Masternode Base'), item[2], item[3], (item[3] / $scope.totalSupply) * 100, item[4]];
           });
           resp.data.data = newdata;
           callback(resp.data);
