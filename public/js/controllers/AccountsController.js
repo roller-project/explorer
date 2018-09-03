@@ -21,7 +21,7 @@ angular.module('BlocksApp').controller('AccountsController', function($statePara
 
           // fixup data to show percentages
           var newdata = resp.data.data.map(function(item) {
-            return [item[0], item[1], item[2], item[3], (item[3] / $scope.totalSupply) * 100, item[4]];
+            return [item[0], item[1].replace('0xf5e48e9cb2fabdf4ce157f23a56f6665e478ec6f','Masternode Contracts'), item[2], item[3], (item[3] / $scope.totalSupply) * 100, item[4]];
           });
           resp.data.data = newdata;
           callback(resp.data);
