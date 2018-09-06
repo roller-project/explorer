@@ -46,7 +46,7 @@ angular.module('BlocksApp').controller('AccountsController', function($statePara
         {
           render:
             function(data, type, row) {
-              return '<a href="/addr/' + data +'">' + data.replace('0xf5e48e9cb2fabdf4ce157f23a56f6665e478ec6f','Masternode Contracts').replace('0x672af8a93fab9135d60ba69218d0d6ce570fa0e4','Miner block 0-50.000').replace('0xf1fd34b7a4d3af6b4a8f6ff7d4c3d982fd5dd6af','Masternode Base') + '</a>'
+              return '<a href="/addr/' + data +'">' + data.replace('0xf5e48e9cb2fabdf4ce157f23a56f6665e478ec6f','Masternode Contracts').replace('0x672af8a93fab9135d60ba69218d0d6ce570fa0e4','Miner block 0-50.000').replace('0xf1fd34b7a4d3af6b4a8f6ff7d4c3d982fd5dd6af','Masternode Base').replace('0xb09974a108b366b1350a63109589f032800aed42','Develop Coinbase') + '</a>'
             },
           targets: [1]
         },
