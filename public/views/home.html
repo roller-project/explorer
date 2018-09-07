@@ -78,7 +78,10 @@
 
 <script type="text/javascript">
     jQuery(document).ready(function(){
-        setInterval(reloadBlocks, 15000); //every 10 seconds
-        setInterval(reloadTransactions, 15000); //every 10 seconds
+        setInterval(function(){
+            reloadBlocks();
+            reloadTransactions();
+        }, 15000); //every 10 seconds
+        
     });
 </script>
