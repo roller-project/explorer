@@ -13,7 +13,7 @@
                 </div>
                 <div class="actions">
                     <div class="btn-group">
-                        <a class="btn btn-med" ng-click="reloadBlocks()"><i class="fa fa-refresh" ng-class="{'fa-spin': blockLoading}"></i>
+                        <a class="btn btn-med btn-reload" ng-click="reloadBlocks()"><i class="fa fa-refresh" ng-class="{'fa-spin': blockLoading}"></i>
                         </a>
                     </div>
                 </div>
@@ -49,7 +49,7 @@
                 </div>
                 <div class="actions">
                     <div class="btn-group">
-                        <a class="btn btn-med" ng-click="reloadTransactions()"><i class="fa fa-refresh" ng-class="{'fa-spin': txLoading}"></i>
+                        <a class="btn btn-med btn-reload" ng-click="reloadTransactions()"><i class="fa fa-refresh" ng-class="{'fa-spin': txLoading}"></i>
                         </a>
                     </div>
                 </div>
@@ -79,7 +79,7 @@
 <script type="text/javascript">
     jQuery(document).ready(function(){
         setInterval(function(){
-            $('[ng-click]').click();
+            $('.btn-reload').click();
         }, 15000); //every 10 seconds
         
     });
