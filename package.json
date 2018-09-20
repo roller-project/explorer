@@ -2,10 +2,10 @@
   "name": "eosc-explorer",
   "version": "0.2.0",
   "description": "A lightweight eos classic block explorer",
-  "repository": "https://github.com/eosclassic/eosc-explorer",
+  "repository": "https://github.com/ethereumproject/explorer",
   "license": "MIT",
   "scripts": {
-    "start": "concurrently \"node tools/sync.js \" ",
+    "start": "concurrently \"node tools/sync.js \" \"node app.js\"  ",
     "pretest": "copyfiles app.js app/  ",
     "test": "./node_modules/.bin/mocha --reporter spec  "
   },
