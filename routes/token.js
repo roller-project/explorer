@@ -210,7 +210,7 @@ module.exports = function(req, res){
     if (after) {
       filter.after = after;
     }
-
+    console.error(filter);
     web3.trace.filter(filter, function(err, tx) {
       if(err || !tx) {
         console.error("TraceWeb3 error :" + err)
