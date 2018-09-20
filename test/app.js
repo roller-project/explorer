@@ -14,7 +14,7 @@ describe("EOS Classic Explorer Server Tests", function() {
         done();
       });
     });
-    var badurl = "http://localhost:3000/eos_classic_is_the_best_classic";
+    var badurl = "http://localhost:3000/eos_classic_is_best_classic";
     it("bad pages go to index", function(done) {
       request(badurl, function(error, response, body) {
         expect(response.statusCode).to.equal(200);

@@ -7,10 +7,9 @@ Please read the README in the root directory that explains the parameters of thi
 require( '../db.js' );
 var etherUnits = require("../lib/etherUnits.js");
 var BigNumber = require('bignumber.js');
-var _ = require('lodash');
 
 var async = require('async');
-
+var fs = require('fs');
 var Web3 = require('web3');
 
 var mongoose        = require( 'mongoose' );
@@ -221,48 +220,77 @@ var writeTransactionsToDB = function(config, blockData, flush) {
 
     // update balances
     if (accounts.length > 0)
-    async.eachSeries(accounts, function(account, eachCallback) {
-      var blockNumber = data[account].blockNumber;
+    async.waterfall([
       // get contract account type
-      web3.eth.getCode(account, function(err, code) {
-        if (err) {
-          console.log("ERROR: fail to getCode(" + account + ")");
-          return eachCallback(err);
-        }
-        if (code.length > 2) {
-          data[account].type = 1; // contract type
+      function(callback) {
+        var batch = web3.createBatch();
+
+        for (var i = 0; i < accounts.length; i++) {
+          var account = accounts[i];
+          batch.add(web3.eth.getCode.request(account));
         }
 
-        web3.eth.getBalance(account, blockNumber, function(err, balance) {
+        batch.requestManager.sendBatch(batch.requests, function(err, results) {
           if (err) {
-            console.log("ERROR: fail to getBalance(" + account + ")");
-            return eachCallback(err);
+            console.log("ERROR: fail to getCode batch job:", err);
+            callback(err);
+            return;
           }
+          results = results || [];
+          batch.requests.map(function (request, index) {
+            return results[index] || {};
+          }).forEach(function (result, i) {
+            var code = batch.requests[i].format ? batch.requests[i].format(result.result) : result.result;
+            if (code.length > 2) {
+              data[batch.requests[i].params[0]].type = 1; // contract type
+            }
 
-          //data[account].balance = web3.fromWei(balance, 'ether');
-          let ether;
-          if (typeof balance === 'object') {
-            ether = parseFloat(balance.div(1e18).toString());
-          } else {
-            ether /= 1e18;
+          });
+          callback(null, data);
+        });
+      }, function(data, callback) {
+        // batch rpc job
+        var batch = web3.createBatch();
+        for (var i = 0; i < accounts.length; i++) {
+          var account = accounts[i];
+          batch.add(web3.eth.getBalance.request(account));
+        }
+
+        batch.requestManager.sendBatch(batch.requests, function(err, results) {
+          if (err) {
+            console.log("ERROR: fail to getBalance batch job:", err);
+            callback(err);
+            return;
           }
-          data[account].balance = ether;
-          eachCallback();
+          results = results || [];
+          batch.requests.map(function (request, index) {
+            return results[index] || {};
+          }).forEach(function (result, i) {
+            var balance = batch.requests[i].format ? batch.requests[i].format(result.result) : result.result;
+
+            let ether;
+            if (typeof balance === 'object') {
+              ether = parseFloat(balance.div(1e18).toString());
+            } else {
+              ether = balance / 1e18;
+            }
+            data[batch.requests[i].params[0]].balance = ether;
+          });
+          callback(null, data);
+        });
+      }], function(error, data) {
+        var n = 0;
+        accounts.forEach(function(account) {
+          n++;
+          if (n <= 5) {
+            console.log(' - upsert ' + account + ' / balance = ' + data[account].balance);
+          } else if (n == 6) {
+            console.log('   (...) total ' + accounts.length + ' accounts updated.');
+          }
+          // upsert account
+          Account.collection.update({ address: account }, { $set: data[account] }, { upsert: true });
         });
       });
-    }, function(err) {
-      var n = 0;
-      accounts.forEach(function(account) {
-        n++;
-        if (n <= 5) {
-          console.log(' - upsert ' + account + ' / balance = ' + data[account].balance);
-        } else if (n == 6) {
-          console.log('   (...) total ' + accounts.length + ' accounts updated.');
-        }
-        // upsert account
-        Account.collection.update({ address: account }, { $set: data[account] }, { upsert: true });
-      });
-    });
 
     if (bulk.length > 0)
     Transaction.collection.insert(bulk, function( err, tx ){
@@ -398,28 +426,38 @@ var checkBlockDBExistsThenWrite = function(config, patchData, flush) {
 /**
   Start config for node connection and sync
 **/
-/**
- * nodeAddr: node address
- * gethPort: geth port
- * bulkSize: size of array in block to use bulk operation
- */
-// load config.json
-var config = { nodeAddr: 'localhost', gethPort: 8545, bulkSize: 100 };
+var config = {};
+//Look for config.json file if not
 try {
-    var local = require('../config.json');
-    _.extend(config, local);
+    var configContents = fs.readFileSync('config.json');
+    config = JSON.parse(configContents);
     console.log('config.json found.');
-} catch (error) {
-    if (error.code === 'MODULE_NOT_FOUND') {
-        var local = require('../config.example.json');
-        _.extend(config, local);
-        console.log('No config file found. Using config.example.json... (config.example.json)');
-    } else {
-        throw error;
-        process.exit(1);
-    }
 }
-
+catch (error) {
+  if (error.code === 'ENOENT') {
+      console.log('No config file found.');
+  }
+  else {
+      throw error;
+      process.exit(1);
+  }
+}
+// set the default NODE address to localhost if it's not provided
+if (!('nodeAddr' in config) || !(config.nodeAddr)) {
+  config.nodeAddr = 'localhost'; // default
+}
+// set the default geth port if it's not provided
+if (!('gethPort' in config) || (typeof config.gethPort) !== 'number') {
+  config.gethPort = 8545; // default
+}
+// set the default output directory if it's not provided
+if (!('output' in config) || (typeof config.output) !== 'string') {
+  config.output = '.'; // default this directory
+}
+// set the default size of array in block to use bulk operation.
+if (!('bulkSize' in config) || (typeof config.bulkSize) !== 'number') {
+  config.bulkSize = 100;
+}
 console.log('Connecting ' + config.nodeAddr + ':' + config.gethPort + '...');
 
 // Sets address for RPC WEB3 to connect to, usually your node IP address defaults ot localhost

@@ -13,8 +13,8 @@ try {
   config = require('./config.json');
 } catch(e) {
   if (e.code == 'MODULE_NOT_FOUND') {
-    console.log('No config file found. Using default configuration... (config.example.json)');
-    config = require('./config.example.json');
+    console.log('No config file found. Using default configuration... (tools/config.json)');
+    config = require('./tools/config.json');
   } else {
     throw e;
     process.exit(1);
@@ -22,7 +22,7 @@ try {
 }
 
 var app = express();
-app.set('port', process.env.PORT || 8000);
+app.set('port', process.env.PORT || 3000);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -85,6 +85,6 @@ var http = require('http').Server(app);
 
 // web3socket(io);
 
-http.listen(app.get('port'), '127.0.0.1', function() {
+http.listen(app.get('port'), '0.0.0.0', function() {
     console.log('Express server listening on port ' + app.get('port'));
 });
